@@ -1,0 +1,74 @@
+[
+  {
+    "id": "matematika",
+    "name": "Matematika",
+    "description": "Pelajari konsep matematika dengan cara yang menyenangkan",
+    "icon": "📐",
+    "color": "#3B82F6",
+    "totalQuestions": 50,
+    "completedQuestions": 0
+  },
+  {
+    "id": "fisika",
+    "name": "Fisika",
+    "description": "Eksplorasi hukum-hukum alam melalui soal-soal interaktif",
+    "icon": "⚛️",
+    "color": "#10B981",
+    "totalQuestions": 45,
+    "completedQuestions": 0
+  },
+  {
+    "id": "kimia",
+    "name": "Kimia",
+    "description": "Pahami reaksi kimia dan struktur molekul",
+    "icon": "🧪",
+    "color": "#F59E0B",
+    "totalQuestions": 40,
+    "completedQuestions": 0
+  },
+  {
+    "id": "biologi",
+    "name": "Biologi",
+    "description": "Jelajahi kehidupan dan sistem biologis",
+    "icon": "🧬",
+    "color": "#8B5CF6",
+    "totalQuestions": 55,
+    "completedQuestions": 0
+  },
+  {
+    "id": "bahasa-indonesia",
+    "name": "Bahasa Indonesia",
+    "description": "Tingkatkan kemampuan berbahasa Indonesia",
+    "icon": "📚",
+    "color": "#EF4444",
+    "totalQuestions": 35,
+    "completedQuestions": 0
+  },
+  {
+    "id": "bahasa-inggris",
+    "name": "Bahasa Inggris",
+    "description": "Master English language skills",
+    "icon": "🌍",
+    "color": "#06B6D4",
+    "totalQuestions": 60,
+    "completedQuestions": 0
+  },
+  {
+    "id": "ips",
+    "name": "Ilmu Pengetahuan Sosial",
+    "description": "Pelajari sejarah, geografi, dan ilmu sosial lainnya",
+    "icon": "🏛️",
+    "color": "#F97316",
+    "totalQuestions": 40,
+    "completedQuestions": 0
+  },
+  {
+    "id": "ipa",
+    "name": "Ilmu Pengetahuan Alam",
+    "description": "Pelajari konsep dasar sains dan eksperimen",
+    "icon": "🔬",
+    "color": "#8B5CF6",
+    "totalQuestions": 45,
+    "completedQuestions": 0
+  }
+]

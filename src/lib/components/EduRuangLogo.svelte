@@ -1,0 +1,182 @@
+<script lang="ts">
+  export let size: number = 64;
+  export let variant: 'default' | 'horizontal' | 'icon' = 'default';
+</script>
+
+{#if variant === 'icon'}
+  <!-- Icon version - just the symbol -->
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 64 64" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+    class="edu-ruang-logo"
+  >
+    <!-- Room frame with window effect -->
+    <rect x="4" y="4" width="56" height="56" rx="8" fill="none" stroke="var(--primary-blue)" stroke-width="2"/>
+    <rect x="8" y="8" width="48" height="48" rx="4" fill="#f0f9ff" stroke="var(--primary-cyan)" stroke-width="1"/>
+    
+    <!-- Book element -->
+    <rect x="16" y="20" width="20" height="24" rx="2" fill="var(--primary-blue)"/>
+    <rect x="18" y="22" width="16" height="20" rx="1" fill="#60a5fa"/>
+    <line x1="26" y1="22" x2="26" y2="42" stroke="#1e40af" stroke-width="1"/>
+    <line x1="20" y1="28" x2="32" y2="28" stroke="#93c5fd" stroke-width="0.5"/>
+    <line x1="20" y1="32" x2="32" y2="32" stroke="#93c5fd" stroke-width="0.5"/>
+    <line x1="20" y1="36" x2="32" y2="36" stroke="#93c5fd" stroke-width="0.5"/>
+    
+    <!-- Circuit/tech elements -->
+    <circle cx="42" cy="24" r="2" fill="var(--primary-cyan)"/>
+    <circle cx="46" cy="28" r="1.5" fill="#22d3ee"/>
+    <circle cx="44" cy="32" r="1" fill="#0891b2"/>
+    <line x1="42" y1="24" x2="46" y2="28" stroke="var(--primary-cyan)" stroke-width="1"/>
+    <line x1="46" y1="28" x2="44" y2="32" stroke="#22d3ee" stroke-width="1"/>
+    
+    <!-- Pixel elements -->
+    <rect x="40" y="36" width="2" height="2" fill="var(--primary-cyan)"/>
+    <rect x="43" y="36" width="2" height="2" fill="#22d3ee"/>
+    <rect x="46" y="36" width="2" height="2" fill="#0891b2"/>
+    <rect x="40" y="39" width="2" height="2" fill="#22d3ee"/>
+    <rect x="43" y="39" width="2" height="2" fill="#0891b2"/>
+    <rect x="46" y="39" width="2" height="2" fill="var(--primary-cyan)"/>
+  </svg>
+{:else if variant === 'horizontal'}
+  <!-- Horizontal version with text -->
+  <div class="logo-horizontal">
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 64 64" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      class="edu-ruang-logo"
+    >
+      <!-- Room frame with window effect -->
+      <rect x="4" y="4" width="56" height="56" rx="8" fill="none" stroke="var(--primary-blue)" stroke-width="2"/>
+      <rect x="8" y="8" width="48" height="48" rx="4" fill="#f0f9ff" stroke="var(--primary-cyan)" stroke-width="1"/>
+      
+      <!-- Book element -->
+      <rect x="16" y="20" width="20" height="24" rx="2" fill="var(--primary-blue)"/>
+      <rect x="18" y="22" width="16" height="20" rx="1" fill="#60a5fa"/>
+      <line x1="26" y1="22" x2="26" y2="42" stroke="#1e40af" stroke-width="1"/>
+      <line x1="20" y1="28" x2="32" y2="28" stroke="#93c5fd" stroke-width="0.5"/>
+      <line x1="20" y1="32" x2="32" y2="32" stroke="#93c5fd" stroke-width="0.5"/>
+      <line x1="20" y1="36" x2="32" y2="36" stroke="#93c5fd" stroke-width="0.5"/>
+      
+      <!-- Circuit/tech elements -->
+      <circle cx="42" cy="24" r="2" fill="var(--primary-cyan)"/>
+      <circle cx="46" cy="28" r="1.5" fill="#22d3ee"/>
+      <circle cx="44" cy="32" r="1" fill="#0891b2"/>
+      <line x1="42" y1="24" x2="46" y2="28" stroke="var(--primary-cyan)" stroke-width="1"/>
+      <line x1="46" y1="28" x2="44" y2="32" stroke="#22d3ee" stroke-width="1"/>
+      
+      <!-- Pixel elements -->
+      <rect x="40" y="36" width="2" height="2" fill="var(--primary-cyan)"/>
+      <rect x="43" y="36" width="2" height="2" fill="#22d3ee"/>
+      <rect x="46" y="36" width="2" height="2" fill="#0891b2"/>
+      <rect x="40" y="39" width="2" height="2" fill="#22d3ee"/>
+      <rect x="43" y="39" width="2" height="2" fill="#0891b2"/>
+      <rect x="46" y="39" width="2" height="2" fill="var(--primary-cyan)"/>
+    </svg>
+    
+    <div class="logo-text">
+      <h1 class="logo-title">Edu Ruang</h1>
+      <p class="logo-subtitle">Learning Space</p>
+    </div>
+  </div>
+{:else}
+  <!-- Default stacked version -->
+  <div class="logo-default">
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 64 64" 
+      fill="none" 
+      xmlns="http://www.w3.org/2000/svg"
+      class="edu-ruang-logo"
+    >
+      <!-- Room frame with window effect -->
+      <rect x="4" y="4" width="56" height="56" rx="8" fill="none" stroke="var(--primary-blue)" stroke-width="2"/>
+      <rect x="8" y="8" width="48" height="48" rx="4" fill="#f0f9ff" stroke="var(--primary-cyan)" stroke-width="1"/>
+      
+      <!-- Book element -->
+      <rect x="16" y="20" width="20" height="24" rx="2" fill="var(--primary-blue)"/>
+      <rect x="18" y="22" width="16" height="20" rx="1" fill="#60a5fa"/>
+      <line x1="26" y1="22" x2="26" y2="42" stroke="#1e40af" stroke-width="1"/>
+      <line x1="20" y1="28" x2="32" y2="28" stroke="#93c5fd" stroke-width="0.5"/>
+      <line x1="20" y1="32" x2="32" y2="32" stroke="#93c5fd" stroke-width="0.5"/>
+      <line x1="20" y1="36" x2="32" y2="36" stroke="#93c5fd" stroke-width="0.5"/>
+      
+      <!-- Circuit/tech elements -->
+      <circle cx="42" cy="24" r="2" fill="var(--primary-cyan)"/>
+      <circle cx="46" cy="28" r="1.5" fill="#22d3ee"/>
+      <circle cx="44" cy="32" r="1" fill="#0891b2"/>
+      <line x1="42" y1="24" x2="46" y2="28" stroke="var(--primary-cyan)" stroke-width="1"/>
+      <line x1="46" y1="28" x2="44" y2="32" stroke="#22d3ee" stroke-width="1"/>
+      
+      <!-- Pixel elements -->
+      <rect x="40" y="36" width="2" height="2" fill="var(--primary-cyan)"/>
+      <rect x="43" y="36" width="2" height="2" fill="#22d3ee"/>
+      <rect x="46" y="36" width="2" height="2" fill="#0891b2"/>
+      <rect x="40" y="39" width="2" height="2" fill="#22d3ee"/>
+      <rect x="43" y="39" width="2" height="2" fill="#0891b2"/>
+      <rect x="46" y="39" width="2" height="2" fill="var(--primary-cyan)"/>
+    </svg>
+    
+    <div class="logo-text text-center">
+      <h1 class="logo-title">Edu Ruang</h1>
+      <p class="logo-subtitle">Learning Space</p>
+    </div>
+  </div>
+{/if}
+
+<style>
+  .edu-ruang-logo {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+  
+  .logo-horizontal {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  
+  .logo-default {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .logo-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--primary-blue);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  
+  .logo-subtitle {
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    color: var(--primary-cyan);
+    opacity: 0.8;
+    margin: 0;
+    margin-top: -2px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .logo-title {
+      font-size: var(--text-lg);
+    }
+    
+    .logo-subtitle {
+      font-size: 0.65rem;
+    }
+  }
+</style>

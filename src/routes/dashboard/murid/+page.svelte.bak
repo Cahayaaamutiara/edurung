@@ -1,0 +1,16 @@
+<!-- Join Class Modal -->
+{#if showJoinClassModal}
+	<div class="modal-overlay" onclick={() => showJoinClassModal = false} onkeydown={(e) => { if (e.key === 'Escape') showJoinClassModal = false; }} role="presentation" tabindex="-1">
+		<div class="modal-content" onclick|stopPropagation onkeydown={(e) => { if (e.key === 'Escape') showJoinClassModal = false; }} role="dialog" aria-modal="true" aria-labelledby="join-class-title" tabindex="0">
+			<div class="modal-header">
+				<h2 id="join-class-title">Gabung Kelas</h2>
+				<button class="close-btn" onclick={() => showJoinClassModal = false} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { showJoinClassModal = false; e.preventDefault(); }}} aria-label="Tutup modal">×</button>
+			</div>
+			<form onsubmit={(event) => { event.preventDefault(); joinClass(); }} onkeydown={(e) => { if (e.key === 'Enter' && e.target instanceof HTMLInputElement) { e.preventDefault(); joinClass(); }}}>
+				<input type="text" bind:value={classCode} placeholder="Masukkan kode kelas" />
+				<button class="btn-primary" onclick={joinClass} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); joinClass(); }}}>Gabung</button>
+				<button class="btn-secondary" onclick={() => showJoinClassModal = false} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showJoinClassModal = false; }}}>Batal</button>
+			</form>
+		</div>
+	</div>
+{/if}
