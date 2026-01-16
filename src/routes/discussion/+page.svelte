@@ -1,20 +1,36 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { currentUser } from '$lib/stores/auth';
-	import { discussionPosts, discussionFunctions } from '$lib/stores/discussion';
-	import { sampleSubjects, sampleDiscussions } from '$lib/data/sampleData';
-	import { formatRelativeTime } from '$lib/utils/helpers';
-	import { MessageCircle, Plus, ThumbsUp, ThumbsDown, UserCircle2, Filter, Search } from 'lucide-svelte';
-	import type { DiscussionPost, Subject } from '$lib/types';
+	import { onMount } from "svelte";
+	import { currentUser } from "$lib/stores/auth";
+	import {
+		discussionPosts,
+		discussionFunctions,
+	} from "$lib/stores/discussion";
+	import { sampleSubjects, sampleDiscussions } from "$lib/data/sampleData";
+	import { formatRelativeTime } from "$lib/utils/helpers";
+	import {
+		MessageCircle,
+		Plus,
+		ThumbsUp,
+		ThumbsDown,
+		UserCircle2,
+		Filter,
+		Search,
+		Reply,
+		Send,
+	} from "lucide-svelte";
+	import type { DiscussionPost, Subject } from "$lib/types";
 
 	const user = $derived($currentUser);
 	const posts = $derived($discussionPosts);
 
 	let showNewPostModal = $state(false);
-	let selectedSubject = $state('');
-	let searchQuery = $state('');
-	let newPostTitle = $state('');
-	let newPostContent = $state('');
+	let selectedSubject = $state(""); // For filtering
+	let newPostSubject = $state(""); // For new post
+	let searchQuery = $state("");
+	let replyingToPostId = $state<string | null>(null);
+	let replyContent = $state("");
+	let newPostTitle = $state("");
+	let newPostContent = $state("");
 	let subjects: Subject[] = $state([]);
 	let filteredPosts: DiscussionPost[] = $state([]);
 
@@ -23,43 +39,66 @@
 	});
 
 	function loadData() {
-		// Load subjects
-		const storedSubjects = localStorage.getItem('edu-ruang-subjects');
-		if (storedSubjects) {
-			subjects = JSON.parse(storedSubjects);
-		}
+		try {
+			// Load subjects
+			const storedSubjects = localStorage.getItem("edu-ruang-subjects");
+			if (storedSubjects) {
+				subjects = JSON.parse(storedSubjects);
+			} else {
+				subjects = sampleSubjects;
+				try {
+					localStorage.setItem(
+						"edu-ruang-subjects",
+						JSON.stringify(sampleSubjects),
+					);
+				} catch (e) {
+					console.error("Storage error", e);
+				}
+			}
 
-		// Initialize discussions if empty
-		if ($discussionPosts.length === 0) {
-			sampleDiscussions.forEach(post => {
-				discussionFunctions.addPost({
-					userId: post.userId,
-					userName: post.userName,
-					userAvatar: post.userAvatar,
-					subjectId: post.subjectId,
-					title: post.title,
-					content: post.content,
-					likes: post.likes,
-					dislikes: post.dislikes,
-					replies: []
+			// Initialize discussions if empty
+			if ($discussionPosts.length === 0) {
+				sampleDiscussions.forEach((post) => {
+					discussionFunctions.addPost({
+						userId: post.userId,
+						userName: post.userName,
+						userAvatar: post.userAvatar,
+						subjectId: post.subjectId,
+						title: post.title,
+						content: post.content,
+						likes: post.likes,
+						dislikes: post.dislikes,
+						replies: [],
+					});
 				});
-			});
+			}
+		} catch (error) {
+			console.error("Load data error:", error);
+			// Fallback
+			if (subjects.length === 0) subjects = sampleSubjects;
 		}
 	}
 
 	function openNewPostModal() {
+		// Reset subject to empty or selected? safe: empty
+		newPostSubject = "";
 		showNewPostModal = true;
 	}
 
 	function closeNewPostModal() {
 		showNewPostModal = false;
-		newPostTitle = '';
-		newPostContent = '';
-		selectedSubject = '';
+		newPostTitle = "";
+		newPostContent = "";
+		newPostSubject = "";
 	}
 
 	function createNewPost() {
-		if (!user || !newPostTitle.trim() || !newPostContent.trim() || !selectedSubject) {
+		if (
+			!user ||
+			!newPostTitle.trim() ||
+			!newPostContent.trim() ||
+			!newPostSubject
+		) {
 			return;
 		}
 
@@ -67,12 +106,12 @@
 			userId: user.id,
 			userName: user.name,
 			userAvatar: user.avatar,
-			subjectId: selectedSubject,
+			subjectId: newPostSubject,
 			title: newPostTitle.trim(),
 			content: newPostContent.trim(),
 			likes: 0,
 			dislikes: 0,
-			replies: []
+			replies: [],
 		});
 
 		closeNewPostModal();
@@ -86,26 +125,56 @@
 		discussionFunctions.dislikePost(postId);
 	}
 
+	function toggleReply(postId: string) {
+		if (replyingToPostId === postId) {
+			replyingToPostId = null;
+		} else {
+			replyingToPostId = postId;
+			replyContent = "";
+		}
+	}
+
+	function submitReply(postId: string) {
+		if (!user || !replyContent.trim()) return;
+
+		discussionFunctions.addReply(postId, {
+			userId: user.id,
+			userName: user.name,
+			userAvatar: user.avatar,
+			postId: postId,
+			content: replyContent.trim(),
+			likes: 0,
+			dislikes: 0,
+		});
+
+		replyingToPostId = null;
+		replyContent = "";
+	}
+
 	function getSubjectName(subjectId: string) {
-		const subject = subjects.find(s => s.id === subjectId);
-		return subject?.name || 'Umum';
+		const subject = subjects.find((s) => s.id === subjectId);
+		return subject?.name || "Umum";
 	}
 
 	function getSubjectColor(subjectId: string) {
-		const subject = subjects.find(s => s.id === subjectId);
-		return subject?.color || '#6B7280';
+		const subject = subjects.find((s) => s.id === subjectId);
+		return subject?.color || "#6B7280";
 	}
 
 	// Filter posts based on search and subject
 	$effect(() => {
-		filteredPosts = posts.filter(post => {
-			const matchesSearch = searchQuery === '' || 
+		filteredPosts = posts.filter((post) => {
+			const matchesSearch =
+				searchQuery === "" ||
 				post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				post.content
+					.toLowerCase()
+					.includes(searchQuery.toLowerCase()) ||
 				post.userName.toLowerCase().includes(searchQuery.toLowerCase());
-			
-			const matchesSubject = selectedSubject === '' || post.subjectId === selectedSubject;
-			
+
+			const matchesSubject =
+				selectedSubject === "" || post.subjectId === selectedSubject;
+
 			return matchesSearch && matchesSubject;
 		});
 	});
@@ -117,9 +186,21 @@
 		<div class="page-header">
 			<div class="header-content">
 				<h1 class="page-title">💬 Forum Diskusi</h1>
-				<p class="page-subtitle">Diskusi dan tanya jawab dengan teman-teman</p>
+				<p class="page-subtitle">
+					Diskusi dan tanya jawab dengan teman-teman
+				</p>
 			</div>
-			<button class="new-post-btn btn-primary" onclick={openNewPostModal} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openNewPostModal(); }}}>
+			<button
+				type="button"
+				class="new-post-btn btn-primary"
+				onclick={openNewPostModal}
+				onkeydown={(e) => {
+					if (e.key === "Enter" || e.key === " ") {
+						e.preventDefault();
+						openNewPostModal();
+					}
+				}}
+			>
 				<Plus size={20} />
 				Buat Pertanyaan
 			</button>
@@ -130,9 +211,9 @@
 			<div class="search-container">
 				<div class="search-input-container">
 					<Search size={20} />
-					<input 
-						type="text" 
-						placeholder="Cari diskusi..." 
+					<input
+						type="text"
+						placeholder="Cari diskusi..."
 						bind:value={searchQuery}
 						class="search-input"
 					/>
@@ -157,7 +238,17 @@
 					<MessageCircle size={48} color="#CBD5E1" />
 					<h3>Belum Ada Diskusi</h3>
 					<p>Jadilah yang pertama untuk memulai diskusi!</p>
-					<button class="btn-primary" onclick={openNewPostModal} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openNewPostModal(); }}}>
+					<button
+						type="button"
+						class="btn-primary"
+						onclick={openNewPostModal}
+						onkeydown={(e) => {
+							if (e.key === "Enter" || e.key === " ") {
+								e.preventDefault();
+								openNewPostModal();
+							}
+						}}
+					>
 						<Plus size={20} />
 						Buat Pertanyaan Pertama
 					</button>
@@ -173,10 +264,21 @@
 									</div>
 									<div class="author-details">
 										<h4>{post.userName}</h4>
-										<span class="post-time">{formatRelativeTime(post.createdAt)}</span>
+										<span class="post-time"
+											>{formatRelativeTime(
+												post.createdAt,
+											)}</span
+										>
 									</div>
 								</div>
-								<div class="subject-tag" style="background: {getSubjectColor(post.subjectId)}20; color: {getSubjectColor(post.subjectId)}">
+								<div
+									class="subject-tag"
+									style="background: {getSubjectColor(
+										post.subjectId,
+									)}20; color: {getSubjectColor(
+										post.subjectId,
+									)}"
+								>
 									{getSubjectName(post.subjectId)}
 								</div>
 							</div>
@@ -188,28 +290,81 @@
 
 							<div class="post-footer">
 								<div class="post-stats">
-									<button 
+									<button
 										class="vote-btn like-btn"
 										onclick={() => likePost(post.id)}
-										onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); likePost(post.id); }}}
+										onkeydown={(e) => {
+											if (
+												e.key === "Enter" ||
+												e.key === " "
+											) {
+												e.preventDefault();
+												likePost(post.id);
+											}
+										}}
 									>
 										<ThumbsUp size={16} />
 										<span>{post.likes}</span>
 									</button>
-									<button 
+									<button
 										class="vote-btn dislike-btn"
 										onclick={() => dislikePost(post.id)}
-										onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); dislikePost(post.id); }}}
+										onkeydown={(e) => {
+											if (
+												e.key === "Enter" ||
+												e.key === " "
+											) {
+												e.preventDefault();
+												dislikePost(post.id);
+											}
+										}}
 									>
 										<ThumbsDown size={16} />
 										<span>{post.dislikes}</span>
 									</button>
+									<button
+										class="vote-btn"
+										onclick={() => toggleReply(post.id)}
+										title="Balas"
+									>
+										<Reply size={16} />
+										<span>Balas</span>
+									</button>
 									<div class="replies-count">
 										<MessageCircle size={16} />
-										<span>{post.replies.length} balasan</span>
+										<span
+											>{post.replies.length} balasan</span
+										>
 									</div>
 								</div>
 							</div>
+
+							{#if replyingToPostId === post.id}
+								<div class="reply-form animate-fade-in">
+									<textarea
+										bind:value={replyContent}
+										class="reply-input"
+										placeholder="Tulis balasan Anda..."
+										rows="1"
+										onkeydown={(e) => {
+											if (
+												e.key === "Enter" &&
+												!e.shiftKey
+											) {
+												e.preventDefault();
+												submitReply(post.id);
+											}
+										}}
+									></textarea>
+									<button
+										class="btn-primary"
+										onclick={() => submitReply(post.id)}
+										disabled={!replyContent.trim()}
+									>
+										<Send size={16} />
+									</button>
+								</div>
+							{/if}
 
 							<!-- Replies -->
 							{#if post.replies.length > 0}
@@ -218,17 +373,37 @@
 									{#each post.replies as reply}
 										<div class="reply-item">
 											<div class="reply-author">
-												<div class="author-avatar small">
+												<div
+													class="author-avatar small"
+												>
 													<UserCircle2 size={24} />
 												</div>
 												<div class="author-details">
-													<span class="author-name">{reply.userName}</span>
-													<span class="reply-time">{formatRelativeTime(reply.createdAt)}</span>
+													<span class="author-name"
+														>{reply.userName}</span
+													>
+													<span class="reply-time"
+														>{formatRelativeTime(
+															reply.createdAt,
+														)}</span
+													>
 												</div>
 											</div>
-											<p class="reply-content">{reply.content}</p>
+											<p class="reply-content">
+												{reply.content}
+											</p>
 											<div class="reply-votes">
-												<button class="vote-btn small" onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); /* Add like functionality if needed */; }}}>
+												<button
+													class="vote-btn small"
+													onkeydown={(e) => {
+														if (
+															e.key === "Enter" ||
+															e.key === " "
+														) {
+															e.preventDefault(); /* Add like functionality if needed */
+														}
+													}}
+												>
 													<ThumbsUp size={12} />
 													<span>{reply.likes}</span>
 												</button>
@@ -247,17 +422,62 @@
 
 <!-- New Post Modal -->
 {#if showNewPostModal}
-	<div class="modal-overlay" onclick={() => { closeNewPostModal(); }} role="presentation" tabindex="-1" onkeydown={(e) => { if (e.key === 'Escape') closeNewPostModal(); if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeNewPostModal(); }}}>
-		<div class="modal-content card" onclick={(e) => { e.stopPropagation(); }} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); }}} role="dialog" aria-modal="true" aria-labelledby="new-post-title" tabindex="0">
+	<div
+		class="modal-overlay"
+		onclick={() => {
+			closeNewPostModal();
+		}}
+		role="presentation"
+		tabindex="-1"
+		onkeydown={(e) => {
+			if (e.key === "Escape") closeNewPostModal();
+			if (e.key === "Enter" || e.key === " ") {
+				e.preventDefault();
+				closeNewPostModal();
+			}
+		}}
+	>
+		<div
+			class="modal-content card"
+			onclick={(e) => {
+				e.stopPropagation();
+			}}
+			onkeydown={(e) => {
+				if (e.key === "Enter" || e.key === " ") {
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			}}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="new-post-title"
+			tabindex="0"
+		>
 			<div class="modal-header">
 				<h2 id="new-post-title">Buat Pertanyaan Baru</h2>
-				<button class="close-btn" onclick={closeNewPostModal} aria-label="Tutup modal" onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeNewPostModal(); }}}>×</button>
+				<button
+					class="close-btn"
+					onclick={closeNewPostModal}
+					aria-label="Tutup modal"
+					onkeydown={(e) => {
+						if (e.key === "Enter" || e.key === " ") {
+							e.preventDefault();
+							closeNewPostModal();
+						}
+					}}>×</button
+				>
 			</div>
 
-			<form onsubmit={(e) => { e.preventDefault(); createNewPost(); }} class="new-post-form">
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					createNewPost();
+				}}
+				class="new-post-form"
+			>
 				<div class="form-group">
 					<label for="subject">Mata Pelajaran</label>
-					<select id="subject" bind:value={selectedSubject} required>
+					<select id="subject" bind:value={newPostSubject} required>
 						<option value="">Pilih Mata Pelajaran</option>
 						{#each subjects as subject}
 							<option value={subject.id}>{subject.name}</option>
@@ -267,18 +487,18 @@
 
 				<div class="form-group">
 					<label for="title">Judul Pertanyaan</label>
-					<input 
+					<input
 						id="title"
-						type="text" 
+						type="text"
 						bind:value={newPostTitle}
 						placeholder="Masukkan judul pertanyaan..."
-						required 
+						required
 					/>
 				</div>
 
 				<div class="form-group">
 					<label for="content">Detail Pertanyaan</label>
-					<textarea 
+					<textarea
 						id="content"
 						bind:value={newPostContent}
 						placeholder="Jelaskan pertanyaan kamu secara detail..."
@@ -288,10 +508,29 @@
 				</div>
 
 				<div class="form-actions">
-					<button type="button" class="btn-secondary" onclick={closeNewPostModal} onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeNewPostModal(); }}}>
+					<button
+						type="button"
+						class="btn-secondary"
+						onclick={closeNewPostModal}
+						onkeydown={(e) => {
+							if (e.key === "Enter" || e.key === " ") {
+								e.preventDefault();
+								closeNewPostModal();
+							}
+						}}
+					>
 						Batal
 					</button>
-					<button type="submit" class="btn-primary" onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); createNewPost(); }}}>
+					<button
+						type="submit"
+						class="btn-primary"
+						onkeydown={(e) => {
+							if (e.key === "Enter" || e.key === " ") {
+								e.preventDefault();
+								createNewPost();
+							}
+						}}
+					>
 						<Plus size={20} />
 						Posting
 					</button>
@@ -428,7 +667,8 @@
 		color: var(--text-primary);
 	}
 
-	.post-time, .reply-time {
+	.post-time,
+	.reply-time {
 		font-size: var(--text-sm);
 		color: var(--text-tertiary);
 	}
@@ -569,7 +809,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		z-index: var(--z-modal);
+		z-index: 9999;
 		padding: var(--space-4);
 	}
 
@@ -704,5 +944,29 @@
 		.modal-content {
 			margin: var(--space-4);
 		}
+	}
+	.reply-form {
+		display: flex;
+		gap: var(--space-2);
+		margin-top: var(--space-4);
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--border-light);
+	}
+
+	.reply-input {
+		flex: 1;
+		padding: var(--space-3);
+		border: 1px solid var(--border-medium);
+		border-radius: var(--radius-lg);
+		font-size: var(--text-sm);
+		resize: vertical;
+		min-height: 44px;
+		font-family: inherit;
+	}
+
+	.reply-input:focus {
+		outline: none;
+		border-color: var(--primary-blue);
+		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 	}
 </style>

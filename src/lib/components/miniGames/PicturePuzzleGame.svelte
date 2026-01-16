@@ -1,15 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { miniGameFunctions } from '$lib/stores/miniGames';
-	import { currentUser } from '$lib/stores/auth';
-	import type { MiniGame, PicturePuzzleData } from '$lib/types';
-	import { Trophy, Clock, RotateCw, Shuffle, Check } from 'lucide-svelte';
+	import { onMount } from "svelte";
+	import { miniGameFunctions } from "$lib/stores/miniGames";
+	import { currentUser } from "$lib/stores/auth";
+	import type { MiniGame, PicturePuzzleData } from "$lib/types";
+	import { Trophy, Clock, RotateCw, Shuffle, Check } from "lucide-svelte";
 
 	export let gameId: string;
 
 	let game: MiniGame | undefined = undefined;
 	let puzzleData: PicturePuzzleData | null = null;
-	let pieces: { id: number; src: string; correctPosition: number; currentPosition: number }[] = [];
+	let pieces: {
+		id: number;
+		src: string;
+		correctPosition: number;
+		currentPosition: number;
+	}[] = [];
 	let draggedPiece: number | null = null;
 	let timeElapsed = 0;
 	let timer: number;
@@ -31,7 +36,7 @@
 
 	function loadGame() {
 		game = miniGameFunctions.getMiniGameById(gameId);
-		if (game?.data && 'pieces' in game.data) {
+		if (game?.data && "pieces" in game.data) {
 			puzzleData = game.data as PicturePuzzleData;
 			initializePuzzle();
 		}
@@ -44,7 +49,7 @@
 			id: index,
 			src: piece.src,
 			correctPosition: piece.correctPosition,
-			currentPosition: index
+			currentPosition: index,
 		}));
 
 		// Shuffle pieces
@@ -67,8 +72,10 @@
 		const shuffled = [...pieces];
 		for (let i = shuffled.length - 1; i > 0; i--) {
 			const j = Math.floor(Math.random() * (i + 1));
-			[shuffled[i].currentPosition, shuffled[j].currentPosition] = 
-			[shuffled[j].currentPosition, shuffled[i].currentPosition];
+			[shuffled[i].currentPosition, shuffled[j].currentPosition] = [
+				shuffled[j].currentPosition,
+				shuffled[i].currentPosition,
+			];
 		}
 		pieces = shuffled;
 		movesCount = 0;
@@ -77,31 +84,34 @@
 	function handleDragStart(event: DragEvent, pieceId: number) {
 		draggedPiece = pieceId;
 		if (event.dataTransfer) {
-			event.dataTransfer.effectAllowed = 'move';
+			event.dataTransfer.effectAllowed = "move";
 		}
 	}
 
 	function handleDragOver(event: DragEvent) {
 		event.preventDefault();
 		if (event.dataTransfer) {
-			event.dataTransfer.dropEffect = 'move';
+			event.dataTransfer.dropEffect = "move";
 		}
 	}
 
 	function handleDrop(event: DragEvent, targetPosition: number) {
 		event.preventDefault();
-		
+
 		if (draggedPiece === null) return;
 
-		const draggedIndex = pieces.findIndex(p => p.id === draggedPiece);
-		const targetIndex = pieces.findIndex(p => p.currentPosition === targetPosition);
+		const draggedIndex = pieces.findIndex((p) => p.id === draggedPiece);
+		const targetIndex = pieces.findIndex(
+			(p) => p.currentPosition === targetPosition,
+		);
 
 		if (draggedIndex !== -1 && targetIndex !== -1) {
 			// Swap positions
 			const temp = pieces[draggedIndex].currentPosition;
-			pieces[draggedIndex].currentPosition = pieces[targetIndex].currentPosition;
+			pieces[draggedIndex].currentPosition =
+				pieces[targetIndex].currentPosition;
 			pieces[targetIndex].currentPosition = temp;
-			
+
 			pieces = [...pieces];
 			movesCount++;
 			checkCompletion();
@@ -112,7 +122,7 @@
 
 	function handlePieceClick(pieceId: number) {
 		// For mobile/touch support - simple adjacent swap logic
-		const clickedPiece = pieces.find(p => p.id === pieceId);
+		const clickedPiece = pieces.find((p) => p.id === pieceId);
 		if (!clickedPiece) return;
 
 		// Find empty space (if any) or swap with adjacent piece
@@ -126,24 +136,29 @@
 			{ row: row - 1, col }, // up
 			{ row: row + 1, col }, // down
 			{ row, col: col - 1 }, // left
-			{ row, col: col + 1 }  // right
-		].filter(pos => 
-			pos.row >= 0 && pos.row < gridSize && 
-			pos.col >= 0 && pos.col < gridSize
+			{ row, col: col + 1 }, // right
+		].filter(
+			(pos) =>
+				pos.row >= 0 &&
+				pos.row < gridSize &&
+				pos.col >= 0 &&
+				pos.col < gridSize,
 		);
 
 		// For simplicity, swap with the first valid adjacent piece
 		const adjacentPos = adjacentPositions[0];
 		if (adjacentPos) {
 			const targetPosition = adjacentPos.row * gridSize + adjacentPos.col;
-			const targetPiece = pieces.find(p => p.currentPosition === targetPosition);
-			
+			const targetPiece = pieces.find(
+				(p) => p.currentPosition === targetPosition,
+			);
+
 			if (targetPiece) {
 				// Swap positions
 				const temp = clickedPiece.currentPosition;
 				clickedPiece.currentPosition = targetPiece.currentPosition;
 				targetPiece.currentPosition = temp;
-				
+
 				pieces = [...pieces];
 				movesCount++;
 				checkCompletion();
@@ -152,26 +167,26 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent, callback: () => void) {
-		if (event.key === 'Enter' || event.key === ' ') {
+		if (event.key === "Enter" || event.key === " ") {
 			event.preventDefault();
 			callback();
 		}
 	}
 
 	function handleDropKeyDown(event: KeyboardEvent, position: number) {
-		if (event.key === 'Enter' || event.key === ' ') {
+		if (event.key === "Enter" || event.key === " ") {
 			event.preventDefault();
 			// Create a synthetic drop event for keyboard users
 			if (draggedPiece !== null) {
-				const syntheticEvent = new DragEvent('drop');
+				const syntheticEvent = new DragEvent("drop");
 				handleDrop(syntheticEvent, position);
 			}
 		}
 	}
 
 	function checkCompletion() {
-		const isComplete = pieces.every(piece => 
-			piece.currentPosition === piece.correctPosition
+		const isComplete = pieces.every(
+			(piece) => piece.currentPosition === piece.correctPosition,
 		);
 
 		if (isComplete) {
@@ -197,7 +212,7 @@
 	}
 
 	function resetPuzzle() {
-		if (confirm('Are you sure you want to reset the puzzle?')) {
+		if (confirm("Are you sure you want to reset the puzzle?")) {
 			shufflePieces();
 			timeElapsed = 0;
 			isCompleted = false;
@@ -209,22 +224,35 @@
 	function formatTime(seconds: number): string {
 		const mins = Math.floor(seconds / 60);
 		const secs = seconds % 60;
-		return `${mins}:${secs.toString().padStart(2, '0')}`;
+		return `${mins}:${secs.toString().padStart(2, "0")}`;
 	}
 
 	function getPieceAtPosition(position: number) {
-		return pieces.find(piece => piece.currentPosition === position);
+		return pieces.find((piece) => piece.currentPosition === position);
+	}
+
+	function getPieceBackgroundPosition(correctPosition: number): string {
+		const gridSize = Math.sqrt(pieces.length);
+		const row = Math.floor(correctPosition / gridSize);
+		const col = correctPosition % gridSize;
+
+		const xPct = gridSize > 1 ? (col / (gridSize - 1)) * 100 : 0;
+		const yPct = gridSize > 1 ? (row / (gridSize - 1)) * 100 : 0;
+
+		return `${xPct}% ${yPct}%`;
 	}
 
 	function getGridClass(position: number): string {
 		const piece = getPieceAtPosition(position);
 		const isCorrect = piece && piece.correctPosition === position;
-		
+
 		return [
-			'puzzle-slot',
-			isCorrect ? 'correct' : '',
-			draggedPiece !== null ? 'drop-zone' : ''
-		].filter(Boolean).join(' ');
+			"puzzle-slot",
+			isCorrect ? "correct" : "",
+			draggedPiece !== null ? "drop-zone" : "",
+		]
+			.filter(Boolean)
+			.join(" ");
 	}
 </script>
 
@@ -233,16 +261,18 @@
 		<!-- Game Header -->
 		<div class="game-header">
 			<div class="game-info">
-				{#if game.id === 'puzzle-geography-1'}
+				{#if game.id === "puzzle-geography-1"}
 					<h1>Susunlah puzzle peta Indonesia berikut ini!</h1>
 				{:else}
 					<h1>{game.title}</h1>
 				{/if}
-				<p class="difficulty difficulty-{game.difficulty}">{game.difficulty.toUpperCase()}</p>
+				<p class="difficulty difficulty-{game.difficulty}">
+					{game.difficulty.toUpperCase()}
+				</p>
 				<p class="description">{puzzleData.description}</p>
 			</div>
 			<div class="game-header-right">
-				{#if user && game.id === 'puzzle-geography-1'}
+				{#if user && game.id === "puzzle-geography-1"}
 					<div class="player-avatar">
 						<span class="avatar-icon">{user.avatar}</span>
 						<span class="player-name">{user.name}</span>
@@ -270,21 +300,28 @@
 				<div class="completion-content">
 					<Check size={48} />
 					<h2>Puzzle Completed!</h2>
-					{#if game.id === 'puzzle-geography-1'}
+					{#if game.id === "puzzle-geography-1"}
 						<p>Selamat! Kamu berhasil menyusun peta Indonesia 🇮🇩</p>
 					{:else}
 						<p>Great job solving the picture puzzle!</p>
 					{/if}
-					{#if user && game.id === 'puzzle-geography-1'}
+					{#if user && game.id === "puzzle-geography-1"}
 						<div class="avatar-celebration">
-							<span class="celebration-avatar">{user.avatar}</span>
-							<span class="celebration-text">Selamat {user.name}!</span>
+							<span class="celebration-avatar">{user.avatar}</span
+							>
+							<span class="celebration-text"
+								>Selamat {user.name}!</span
+							>
 						</div>
 					{/if}
 					<div class="final-stats">
 						<div>Time: {formatTime(timeElapsed)}</div>
 						<div>Moves: {movesCount}</div>
-						<div>Score: {game.basePoints + Math.max(0, 180 - timeElapsed) * 3 - Math.max(0, movesCount - pieces.length) * 2}</div>
+						<div>
+							Score: {game.basePoints +
+								Math.max(0, 180 - timeElapsed) * 3 -
+								Math.max(0, movesCount - pieces.length) * 2}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -296,21 +333,27 @@
 				<div class="preview-header">
 					<h3>Reference Image</h3>
 					<button class="preview-toggle" on:click={togglePreview}>
-						{showPreview ? 'Hide' : 'Show'} Preview
+						{showPreview ? "Hide" : "Show"} Preview
 					</button>
 				</div>
 				{#if showPreview}
 					<div class="preview-image">
-						<img src={puzzleData.completeImage} alt="Complete puzzle reference" />
+						<img
+							src={puzzleData.completeImage}
+							alt="Complete puzzle reference"
+						/>
 					</div>
 				{/if}
-				
+
 				<div class="game-controls">
 					<button class="control-button" on:click={shufflePieces}>
 						<Shuffle size={16} />
 						Shuffle
 					</button>
-					<button class="control-button secondary" on:click={resetPuzzle}>
+					<button
+						class="control-button secondary"
+						on:click={resetPuzzle}
+					>
 						<RotateCw size={16} />
 						Reset
 					</button>
@@ -319,7 +362,12 @@
 
 			<!-- Puzzle Grid -->
 			<div class="puzzle-container">
-				<div class="puzzle-grid" style="grid-template-columns: repeat({Math.sqrt(pieces.length)}, 1fr);">
+				<div
+					class="puzzle-grid"
+					style="grid-template-columns: repeat({Math.sqrt(
+						pieces.length,
+					)}, 1fr);"
+				>
 					{#each Array(pieces.length) as _, position}
 						<div
 							class={getGridClass(position)}
@@ -332,16 +380,33 @@
 							{#each pieces as piece}
 								{#if piece.currentPosition === position}
 									<div
-										class="puzzle-piece {piece.correctPosition === position ? 'correct-position' : ''}"
+										class="puzzle-piece {piece.correctPosition ===
+										position
+											? 'correct-position'
+											: ''}"
 										draggable="true"
-										on:dragstart={(e) => handleDragStart(e, piece.id)}
-										on:click={() => handlePieceClick(piece.id)}
-										on:keydown={(e) => handleKeyDown(e, () => handlePieceClick(piece.id))}
+										on:dragstart={(e) =>
+											handleDragStart(e, piece.id)}
+										on:click={() =>
+											handlePieceClick(piece.id)}
+										on:keydown={(e) =>
+											handleKeyDown(e, () =>
+												handlePieceClick(piece.id),
+											)}
 										role="button"
 										tabindex="0"
 									>
-										<img src={piece.src} alt="Puzzle piece {piece.id + 1}" />
-										<div class="piece-number">{piece.id + 1}</div>
+										<div
+											class="piece-image"
+											style="
+												background-image: url({puzzleData.completeImage});
+												background-size: {Math.sqrt(pieces.length) * 100}%;
+												background-position: {getPieceBackgroundPosition(piece.correctPosition)};
+											"
+										></div>
+										<div class="piece-number">
+											{piece.id + 1}
+										</div>
 									</div>
 								{/if}
 							{/each}
@@ -351,11 +416,20 @@
 
 				<div class="puzzle-progress">
 					<div class="progress-info">
-						<span>Progress: {pieces.filter(p => p.currentPosition === p.correctPosition).length} / {pieces.length}</span>
+						<span
+							>Progress: {pieces.filter(
+								(p) => p.currentPosition === p.correctPosition,
+							).length} / {pieces.length}</span
+						>
 						<div class="progress-bar">
-							<div 
-								class="progress-fill" 
-								style="width: {(pieces.filter(p => p.currentPosition === p.correctPosition).length / pieces.length) * 100}%"
+							<div
+								class="progress-fill"
+								style="width: {(pieces.filter(
+									(p) =>
+										p.currentPosition === p.correctPosition,
+								).length /
+									pieces.length) *
+									100}%"
 							></div>
 						</div>
 					</div>
@@ -374,7 +448,8 @@
 		max-width: 1200px;
 		margin: 0 auto;
 		padding: 1rem;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+			sans-serif;
 	}
 
 	.game-header {
@@ -425,9 +500,15 @@
 		display: inline-block;
 	}
 
-	.difficulty-easy { background: #10b981; }
-	.difficulty-medium { background: #f59e0b; }
-	.difficulty-hard { background: #ef4444; }
+	.difficulty-easy {
+		background: #10b981;
+	}
+	.difficulty-medium {
+		background: #f59e0b;
+	}
+	.difficulty-hard {
+		background: #ef4444;
+	}
 
 	.description {
 		margin: 0;
@@ -659,11 +740,10 @@
 		box-shadow: 0 0 0 1px #10b981;
 	}
 
-	.puzzle-piece img {
+	.piece-image {
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
-		display: block;
+		background-repeat: no-repeat;
 	}
 
 	.piece-number {
@@ -725,7 +805,8 @@
 	}
 
 	@keyframes bounce {
-		0%, 100% {
+		0%,
+		100% {
 			transform: translateY(0);
 		}
 		50% {

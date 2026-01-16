@@ -1,31 +1,46 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { currentUser, authFunctions } from '$lib/stores/auth';
-	import { gameHistory } from '$lib/stores/game';
-	import { discussionPosts } from '$lib/stores/discussion';
-	import { calculateLevel, calculateProgress, formatDate, availableAvatars } from '$lib/utils/helpers';
-	import EditProfileButton from '$lib/components/profile/EditProfileButton.svelte';
-	import { 
-		UserCircle2, Edit3, Trophy, Target, Calendar, TrendingUp,
-		Gamepad2, MessageCircle, Star, Award, Save, X
-	} from 'lucide-svelte';
-	import type { User, GameSession, DiscussionPost } from '$lib/types';
+	import { onMount } from "svelte";
+	import { currentUser, authFunctions } from "$lib/stores/auth";
+	import { gameHistory } from "$lib/stores/game";
+	import { discussionPosts } from "$lib/stores/discussion";
+	import {
+		calculateLevel,
+		calculateProgress,
+		formatDate,
+		availableAvatars,
+	} from "$lib/utils/helpers";
+	import EditProfileButton from "$lib/components/profile/EditProfileButton.svelte";
+	import {
+		UserCircle2,
+		Edit3,
+		Trophy,
+		Target,
+		Calendar,
+		TrendingUp,
+		Gamepad2,
+		MessageCircle,
+		Star,
+		Award,
+		Save,
+		X,
+	} from "lucide-svelte";
+	import type { User, GameSession, DiscussionPost } from "$lib/types";
 
 	const user = $derived($currentUser);
 	const games = $derived($gameHistory);
 	const discussions = $derived($discussionPosts);
 
 	let isEditing = $state(false);
-	let editName = $state('');
-	let editClass = $state('');
-	let editAvatar = $state('');
+	let editName = $state("");
+	let editClass = $state("");
+	let editAvatar = $state("");
 	let userStats = $state({
 		totalGamesPlayed: 0,
 		averageScore: 0,
-		bestSubject: '',
+		bestSubject: "",
 		currentStreak: 0,
 		totalDiscussions: 0,
-		totalPoints: 0
+		totalPoints: 0,
 	});
 
 	onMount(() => {
@@ -41,36 +56,46 @@
 		if (!user) return;
 
 		// Game statistics
-		const userGames = games.filter(game => game.userId === user.id && game.isCompleted);
+		const userGames = games.filter(
+			(game) => game.userId === user.id && game.isCompleted,
+		);
 		userStats.totalGamesPlayed = userGames.length;
-		
+
 		if (userGames.length > 0) {
-			userStats.averageScore = Math.round(userGames.reduce((sum, game) => sum + game.score, 0) / userGames.length);
-			
+			userStats.averageScore = Math.round(
+				userGames.reduce((sum, game) => sum + game.score, 0) /
+					userGames.length,
+			);
+
 			// Find best subject (most played)
 			const subjectCounts: { [key: string]: number } = {};
-			userGames.forEach(game => {
-				subjectCounts[game.subjectId] = (subjectCounts[game.subjectId] || 0) + 1;
+			userGames.forEach((game) => {
+				subjectCounts[game.subjectId] =
+					(subjectCounts[game.subjectId] || 0) + 1;
 			});
-			
-			const bestSubjectId = Object.keys(subjectCounts).reduce((a, b) => 
-				subjectCounts[a] > subjectCounts[b] ? a : b, '');
-			
+
+			const bestSubjectId = Object.keys(subjectCounts).reduce(
+				(a, b) => (subjectCounts[a] > subjectCounts[b] ? a : b),
+				"",
+			);
+
 			// Map subject ID to name
 			const subjectNames: { [key: string]: string } = {
-				'matematika': 'Matematika',
-				'fisika': 'Fisika',
-				'kimia': 'Kimia',
-				'biologi': 'Biologi',
-				'bahasa-indonesia': 'Bahasa Indonesia',
-				'bahasa-inggris': 'Bahasa Inggris'
+				matematika: "Matematika",
+				fisika: "Fisika",
+				kimia: "Kimia",
+				biologi: "Biologi",
+				"bahasa-indonesia": "Bahasa Indonesia",
+				"bahasa-inggris": "Bahasa Inggris",
 			};
-			
-			userStats.bestSubject = subjectNames[bestSubjectId] || 'Belum ada';
+
+			userStats.bestSubject = subjectNames[bestSubjectId] || "Belum ada";
 		}
 
 		// Discussion statistics
-		const userDiscussions = discussions.filter(post => post.userId === user.id);
+		const userDiscussions = discussions.filter(
+			(post) => post.userId === user.id,
+		);
 		userStats.totalDiscussions = userDiscussions.length;
 
 		userStats.totalPoints = user.points;
@@ -78,8 +103,8 @@
 
 	function startEditing() {
 		isEditing = true;
-		editName = user?.name || '';
-		editClass = user?.class || '';
+		editName = user?.name || "";
+		editClass = user?.class || "";
 		editAvatar = user?.avatar || availableAvatars[0];
 	}
 
@@ -98,7 +123,7 @@
 		authFunctions.updateUser({
 			name: editName.trim(),
 			class: editClass.trim(),
-			avatar: editAvatar
+			avatar: editAvatar,
 		});
 
 		isEditing = false;
@@ -109,7 +134,9 @@
 	}
 
 	const levelProgress = $derived(user ? calculateProgress(user.points) : 0);
-	const nextLevelPoints = $derived(user ? Math.ceil((user.level * 100) - user.points) : 0);
+	const nextLevelPoints = $derived(
+		user ? Math.ceil(user.level * 100 - user.points) : 0,
+	);
 </script>
 
 <div class="profile-page">
@@ -118,16 +145,30 @@
 		<div class="profile-header card">
 			<div class="profile-info">
 				<div class="avatar-section">
-					<div class="user-avatar large">
-						<UserCircle2 size={80} />
+					<div
+						class="user-avatar large"
+						style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center;"
+					>
+						{#if user?.avatar && user.avatar.startsWith("data:")}
+							<img
+								src={user.avatar}
+								alt="Profile"
+								style="width: 100%; height: 100%; object-fit: cover;"
+							/>
+						{:else}
+							<UserCircle2 size={80} />
+						{/if}
 					</div>
 					{#if isEditing}
 						<div class="avatar-selector">
 							<h4>Pilih Avatar:</h4>
 							<div class="avatar-grid">
 								{#each availableAvatars as avatar}
-									<button 
-										class="avatar-option {editAvatar === avatar ? 'selected' : ''}"
+									<button
+										class="avatar-option {editAvatar ===
+										avatar
+											? 'selected'
+											: ''}"
 										onclick={() => selectAvatar(avatar)}
 									>
 										<UserCircle2 size={24} />
@@ -141,8 +182,8 @@
 				<div class="user-details">
 					{#if isEditing}
 						<div class="edit-form">
-							<input 
-								type="text" 
+							<input
+								type="text"
 								bind:value={editName}
 								placeholder="Nama lengkap"
 								class="edit-input"
@@ -163,24 +204,40 @@
 								<option value="XII IPS 2">XII IPS 2</option>
 							</select>
 							<div class="edit-actions">
-								<button class="btn-primary btn-sm" onclick={saveProfile}>
+								<button
+									class="btn-primary btn-sm"
+									onclick={saveProfile}
+								>
 									<Save size={16} />
 									Simpan
 								</button>
-								<button class="btn-secondary btn-sm" onclick={cancelEditing}>
+								<button
+									class="btn-secondary btn-sm"
+									onclick={cancelEditing}
+								>
 									<X size={16} />
 									Batal
 								</button>
 							</div>
 						</div>
 					{:else}
-						<h1 class="user-name">{user?.name || 'Nama Pengguna'}</h1>
-						<p class="user-class">{user?.class || 'Kelas tidak diset'}</p>
-						<p class="user-username">@{user?.username || 'username'}</p>
+						<h1 class="user-name">
+							{user?.name || "Nama Pengguna"}
+						</h1>
+						<p class="user-class">
+							{user?.class || "Kelas tidak diset"}
+						</p>
+						<p class="user-username">
+							@{user?.username || "username"}
+						</p>
 						<div class="user-meta">
 							<div class="meta-item">
 								<Calendar size={16} />
-								<span>Bergabung {user ? formatDate(user.joinDate) : ''}</span>
+								<span
+									>Bergabung {user
+										? formatDate(user.joinDate)
+										: ""}</span
+								>
 							</div>
 						</div>
 					{/if}
@@ -188,10 +245,10 @@
 			</div>
 
 			{#if !isEditing}
-				<EditProfileButton 
-					variant="secondary" 
-					size="md" 
-					text="Edit Profil" 
+				<EditProfileButton
+					variant="secondary"
+					size="md"
+					text="Edit Profil"
 				/>
 			{/if}
 		</div>
@@ -204,17 +261,24 @@
 					Level {user?.level || 1}
 				</div>
 			</div>
-			
+
 			<div class="level-progress">
 				<div class="progress-info">
 					<span>Progress ke Level {(user?.level || 1) + 1}</span>
-					<span>{user?.points || 0} / {((user?.level || 1) + 1) * 100} poin</span>
+					<span
+						>{user?.points || 0} / {((user?.level || 1) + 1) * 100} poin</span
+					>
 				</div>
 				<div class="progress-bar">
-					<div class="progress-fill" style="width: {levelProgress}%"></div>
+					<div
+						class="progress-fill"
+						style="width: {levelProgress}%"
+					></div>
 				</div>
 				<p class="progress-text">
-					{nextLevelPoints > 0 ? `${nextLevelPoints} poin lagi untuk naik level!` : 'Maksimal level tercapai!'}
+					{nextLevelPoints > 0
+						? `${nextLevelPoints} poin lagi untuk naik level!`
+						: "Maksimal level tercapai!"}
 				</p>
 			</div>
 		</div>
@@ -268,7 +332,7 @@
 						<Star style="color: #EF4444" size={32} />
 					</div>
 					<div class="stat-content">
-						<h3>{userStats.bestSubject || 'Belum ada'}</h3>
+						<h3>{userStats.bestSubject || "Belum ada"}</h3>
 						<p>Mata Pelajaran Favorit</p>
 					</div>
 				</div>
@@ -299,7 +363,9 @@
 								<h4>Menyelesaikan kuis</h4>
 								<p>Skor: {game.score} poin</p>
 								<span class="activity-time">
-									{game.endTime ? formatDate(new Date(game.endTime)) : 'Belum selesai'}
+									{game.endTime
+										? formatDate(new Date(game.endTime))
+										: "Belum selesai"}
 								</span>
 							</div>
 							<div class="activity-score">
@@ -315,7 +381,11 @@
 		<div class="achievements-section">
 			<h2 class="section-title">Pencapaian</h2>
 			<div class="achievements-grid">
-				<div class="achievement-card card {user && user.points >= 100 ? 'unlocked' : 'locked'}">
+				<div
+					class="achievement-card card {user && user.points >= 100
+						? 'unlocked'
+						: 'locked'}"
+				>
 					<div class="achievement-icon">
 						<Trophy size={32} />
 					</div>
@@ -325,7 +395,12 @@
 					</div>
 				</div>
 
-				<div class="achievement-card card {userStats.totalGamesPlayed >= 5 ? 'unlocked' : 'locked'}">
+				<div
+					class="achievement-card card {userStats.totalGamesPlayed >=
+					5
+						? 'unlocked'
+						: 'locked'}"
+				>
 					<div class="achievement-icon">
 						<Gamepad2 size={32} />
 					</div>
@@ -335,7 +410,12 @@
 					</div>
 				</div>
 
-				<div class="achievement-card card {userStats.totalDiscussions >= 1 ? 'unlocked' : 'locked'}">
+				<div
+					class="achievement-card card {userStats.totalDiscussions >=
+					1
+						? 'unlocked'
+						: 'locked'}"
+				>
 					<div class="achievement-icon">
 						<MessageCircle size={32} />
 					</div>
@@ -345,7 +425,11 @@
 					</div>
 				</div>
 
-				<div class="achievement-card card {user && user.level >= 5 ? 'unlocked' : 'locked'}">
+				<div
+					class="achievement-card card {user && user.level >= 5
+						? 'unlocked'
+						: 'locked'}"
+				>
 					<div class="achievement-icon">
 						<Star size={32} />
 					</div>
@@ -482,8 +566,6 @@
 		display: flex;
 		gap: var(--space-2);
 	}
-
-
 
 	/* Level Section */
 	.level-section {

@@ -1,10 +1,11 @@
 import { writable } from 'svelte/store';
-import type { 
-  MiniGame, 
-  MiniGameSession, 
-  WeeklyLeaderboardEntry 
+import type {
+  MiniGame,
+  MiniGameSession,
+  WeeklyLeaderboardEntry
 } from '../types';
 import { sampleMiniGames } from '$lib/data/miniGamesData';
+import { currentUser } from './auth';
 
 // Mini-games state
 export const availableMiniGames = writable<MiniGame[]>([]);
@@ -95,11 +96,20 @@ export const miniGameFunctions = {
         averageScore: Math.round((currentStats.totalScore + score) / (currentStats.totalGamesPlayed + 1)),
         gamesCompletedThisWeek: currentStats.gamesCompletedThisWeek + 1
       };
-      
+
       // Save to localStorage
       localStorage.setItem('edu-ruang-minigame-stats', JSON.stringify(newStats));
-      
+
       return newStats;
+    });
+
+    // Update user points globally
+    currentUser.update(user => {
+      if (!user) return null;
+      return {
+        ...user,
+        points: (user.points || 0) + score
+      };
     });
 
     // Save game session
@@ -110,7 +120,7 @@ export const miniGameFunctions = {
       hintsUsed,
       completedAt: new Date().toISOString()
     };
-    
+
     const sessions = JSON.parse(localStorage.getItem('edu-ruang-minigame-sessions') || '[]');
     sessions.push(session);
     localStorage.setItem('edu-ruang-minigame-sessions', JSON.stringify(sessions));
@@ -136,7 +146,7 @@ export const miniGameFunctions = {
         userId: 'user-2',
         name: 'Siti Nurhaliza',
         avatar: 'student-2',
-        class: 'XII IPA 2', 
+        class: 'XII IPA 2',
         rank: 2,
         totalScore: 1320,
         gamesPlayed: 12,

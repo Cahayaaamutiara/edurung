@@ -1,112 +1,154 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
-  import { currentUser, authFunctions } from '$lib/stores/auth';
-  import { notificationFunctions } from '$lib/stores/notifications';
-  import { availableAvatars } from '$lib/utils/helpers';
-  import { 
-    UserCircle2, 
-    Save, 
-    ArrowLeft, 
+  import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
+  import { currentUser, authFunctions } from "$lib/stores/auth";
+  import { notificationFunctions } from "$lib/stores/notifications";
+  import { availableAvatars } from "$lib/utils/helpers";
+  import {
+    UserCircle2,
+    Save,
+    ArrowLeft,
     Camera,
     GraduationCap,
     Mail,
-    Calendar
-  } from 'lucide-svelte';
-  import type { User } from '$lib/types';
+    Calendar,
+  } from "lucide-svelte";
+  import type { User } from "$lib/types";
 
   const user = $derived($currentUser);
-  
+
   // Form state
   let editForm = {
-    name: '',
-    class: '',
-    avatar: '',
-    username: ''
+    name: "",
+    class: "",
+    avatar: "",
+    username: "",
   };
-  
+
   let isLoading = false;
   let formErrors: Record<string, string> = {};
 
+  let fileInput: HTMLInputElement;
+
+  function handleFileSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+
+      // Limit size to 2MB
+      if (file.size > 2 * 1024 * 1024) {
+        notificationFunctions.addNotification({
+          type: "challenge",
+          title: "File Terlalu Besar",
+          message: "Maksimal ukuran file adalah 2MB",
+          data: null,
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          editForm.avatar = e.target.result as string;
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function triggerFileUpload() {
+    fileInput.click();
+  }
+
   // Class options for the select dropdown
   const classOptions = [
-    'X IPA 1', 'X IPA 2', 'X IPS 1', 'X IPS 2',
-    'XI IPA 1', 'XI IPA 2', 'XI IPS 1', 'XI IPS 2',
-    'XII IPA 1', 'XII IPA 2', 'XII IPS 1', 'XII IPS 2'
+    "X IPA 1",
+    "X IPA 2",
+    "X IPS 1",
+    "X IPS 2",
+    "XI IPA 1",
+    "XI IPA 2",
+    "XI IPS 1",
+    "XI IPS 2",
+    "XII IPA 1",
+    "XII IPA 2",
+    "XII IPS 1",
+    "XII IPS 2",
   ];
 
   onMount(() => {
     // Redirect if not logged in
     if (!user) {
-      goto('/login');
+      goto("/login");
       return;
     }
-    
+
     // Initialize form with current user data
     editForm = {
-      name: user.name || '',
-      class: user.class || '',
+      name: user.name || "",
+      class: user.class || "",
       avatar: user.avatar || availableAvatars[0],
-      username: user.username || ''
+      username: user.username || "",
     };
   });
 
   function validateForm(): boolean {
     formErrors = {};
-    
+
     if (!editForm.name.trim()) {
-      formErrors.name = 'Nama tidak boleh kosong';
+      formErrors.name = "Nama tidak boleh kosong";
     } else if (editForm.name.trim().length < 2) {
-      formErrors.name = 'Nama minimal 2 karakter';
+      formErrors.name = "Nama minimal 2 karakter";
     }
-    
+
     if (!editForm.class) {
-      formErrors.class = 'Silakan pilih kelas';
+      formErrors.class = "Silakan pilih kelas";
     }
-    
+
     if (!editForm.username.trim()) {
-      formErrors.username = 'Username tidak boleh kosong';
+      formErrors.username = "Username tidak boleh kosong";
     } else if (editForm.username.trim().length < 3) {
-      formErrors.username = 'Username minimal 3 karakter';
+      formErrors.username = "Username minimal 3 karakter";
     } else if (!/^[a-zA-Z0-9_]+$/.test(editForm.username.trim())) {
-      formErrors.username = 'Username hanya boleh mengandung huruf, angka, dan underscore';
+      formErrors.username =
+        "Username hanya boleh mengandung huruf, angka, dan underscore";
     }
-    
+
     return Object.keys(formErrors).length === 0;
   }
 
   async function handleSave() {
     if (!validateForm()) return;
-    
+
     isLoading = true;
-    
+
     try {
       // Update user profile
       await authFunctions.updateUser({
         name: editForm.name.trim(),
         class: editForm.class,
         avatar: editForm.avatar,
-        username: editForm.username.trim()
+        username: editForm.username.trim(),
       });
-      
+
       // Show success notification
       notificationFunctions.addNotification({
-        type: 'achievement',
-        title: 'Profil Berhasil Diperbarui',
-        message: 'Perubahan profil Anda telah disimpan.',
-        data: null
+        type: "achievement",
+        title: "Profil Berhasil Diperbarui",
+        message: "Perubahan profil Anda telah disimpan.",
+        data: null,
       });
-      
+
       // Redirect back to profile page
-      goto('/profile');
-      
+      goto("/profile");
     } catch (error) {
-      console.error('Failed to update profile:', error);
+      console.error("Failed to update profile:", error);
       notificationFunctions.addNotification({
-        type: 'challenge',
-        title: 'Gagal Memperbarui Profil',
-        message: 'Terjadi kesalahan saat menyimpan perubahan. Silakan coba lagi.',
-        data: null
+        type: "challenge",
+        title: "Gagal Memperbarui Profil",
+        message:
+          "Terjadi kesalahan saat menyimpan perubahan. Silakan coba lagi.",
+        data: null,
       });
     } finally {
       isLoading = false;
@@ -114,7 +156,7 @@
   }
 
   function handleCancel() {
-    goto('/profile');
+    goto("/profile");
   }
 
   function selectAvatar(avatar: string) {
@@ -135,7 +177,8 @@
         Kembali
       </button>
       <h1 class="page-title">Edit Profil</h1>
-      <div></div> <!-- Spacer for flex layout -->
+      <div></div>
+      <!-- Spacer for flex layout -->
     </div>
 
     <!-- Edit Form -->
@@ -149,15 +192,48 @@
           </h3>
           <div class="current-avatar">
             <div class="user-avatar extra-large">
-              <UserCircle2 size={100} />
+              {#if editForm.avatar && editForm.avatar.startsWith("data:")}
+                <img
+                  src={editForm.avatar}
+                  alt="Avatar Preview"
+                  class="avatar-image-preview"
+                />
+              {:else}
+                <UserCircle2 size={100} />
+              {/if}
             </div>
-            <p class="avatar-hint">Pilih avatar di bawah ini</p>
+
+            <div
+              class="upload-actions"
+              style="margin-bottom: 1rem; display: flex; justify-content: center;"
+            >
+              <input
+                type="file"
+                bind:this={fileInput}
+                hidden
+                accept="image/*"
+                onchange={handleFileSelect}
+              />
+              <button
+                class="btn-secondary btn-sm"
+                onclick={triggerFileUpload}
+                type="button"
+                style="display: flex; align-items: center; gap: 0.5rem;"
+              >
+                <Camera size={16} />
+                Ambil Foto / Galeri
+              </button>
+            </div>
+
+            <p class="avatar-hint">Atau pilih avatar dari koleksi</p>
           </div>
-          
+
           <div class="avatar-grid">
             {#each availableAvatars as avatar}
-              <button 
-                class="avatar-option {editForm.avatar === avatar ? 'selected' : ''}"
+              <button
+                class="avatar-option {editForm.avatar === avatar
+                  ? 'selected'
+                  : ''}"
                 onclick={() => selectAvatar(avatar)}
                 type="button"
               >
@@ -173,12 +249,12 @@
             <UserCircle2 size={20} />
             Informasi Pribadi
           </h3>
-          
+
           <div class="form-group">
             <label for="name" class="form-label">Nama Lengkap</label>
-            <input 
+            <input
               id="name"
-              type="text" 
+              type="text"
               bind:value={editForm.name}
               placeholder="Masukkan nama lengkap"
               class="form-input {formErrors.name ? 'error' : ''}"
@@ -191,9 +267,9 @@
 
           <div class="form-group">
             <label for="username" class="form-label">Username</label>
-            <input 
+            <input
               id="username"
-              type="text" 
+              type="text"
               bind:value={editForm.username}
               placeholder="Masukkan username"
               class="form-input {formErrors.username ? 'error' : ''}"
@@ -202,7 +278,9 @@
             {#if formErrors.username}
               <span class="error-message">{formErrors.username}</span>
             {/if}
-            <span class="input-hint">Username akan digunakan sebagai identitas unik Anda</span>
+            <span class="input-hint"
+              >Username akan digunakan sebagai identitas unik Anda</span
+            >
           </div>
         </div>
 
@@ -212,12 +290,12 @@
             <GraduationCap size={20} />
             Informasi Akademik
           </h3>
-          
+
           <div class="form-group">
             <label for="class" class="form-label">Kelas</label>
-            <select 
+            <select
               id="class"
-              bind:value={editForm.class} 
+              bind:value={editForm.class}
               class="form-select {formErrors.class ? 'error' : ''}"
               disabled={isLoading}
             >
@@ -250,7 +328,9 @@
               </div>
               <div class="summary-item">
                 <span class="summary-label">Bergabung Sejak:</span>
-                <span class="summary-value">{new Date(user.joinDate).toLocaleDateString('id-ID')}</span>
+                <span class="summary-value"
+                  >{new Date(user.joinDate).toLocaleDateString("id-ID")}</span
+                >
               </div>
             </div>
           </div>
@@ -259,7 +339,7 @@
 
       <!-- Action Buttons -->
       <div class="form-actions">
-        <button 
+        <button
           class="btn-secondary btn-lg"
           onclick={handleCancel}
           disabled={isLoading}
@@ -267,7 +347,7 @@
         >
           Batal
         </button>
-        <button 
+        <button
           class="btn-primary btn-lg"
           onclick={handleSave}
           disabled={isLoading}
@@ -366,6 +446,13 @@
     color: white;
     margin: 0 auto var(--space-3);
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  .avatar-image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .avatar-hint {
@@ -523,7 +610,9 @@
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   /* Responsive Design */

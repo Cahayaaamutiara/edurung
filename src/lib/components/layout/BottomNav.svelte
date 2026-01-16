@@ -25,7 +25,7 @@
 				aria-label={item.label}
 			>
 				<div class="nav-icon">
-					{@render item.icon({ size: 24 })}
+					<item.icon size={24} />
 					{#if item.path === '/discussion' && notificationCount > 0}
 						<div class="notification-badge">{notificationCount}</div>
 					{/if}

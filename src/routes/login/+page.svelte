@@ -1,45 +1,61 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { authFunctions } from '$lib/stores/auth';
-	import { validateUsername, generateId, availableAvatars } from '$lib/utils/helpers';
-	import { UserCircle2, LogIn, AlertCircle } from 'lucide-svelte';
-	import type { EduRuangUser } from '$lib/types/gamification';
+	import { goto } from "$app/navigation";
+	import { authFunctions } from "$lib/stores/auth";
+	import {
+		validateUsername,
+		generateId,
+		availableAvatars,
+	} from "$lib/utils/helpers";
+	import {
+		UserCircle2,
+		LogIn,
+		AlertCircle,
+		School,
+		GraduationCap,
+	} from "lucide-svelte";
+	import type { EduRuangUser } from "$lib/types/gamification";
 
-	let username = '';
-	let name = '';
-	let class_name = '';
+	let username = "";
+	let name = "";
+	let class_name = "";
 	let selectedAvatar = availableAvatars[0];
-	let errorMessage = '';
+	let selectedRole: "murid" | "guru" = "murid";
+	let errorMessage = "";
 	let isLoading = false;
 
 	function handleLogin() {
 		if (isLoading) return;
-		
-		errorMessage = '';
-		
+
+		errorMessage = "";
+
 		// Validation
 		if (!username.trim() || !name.trim() || !class_name.trim()) {
-			errorMessage = 'Semua field harus diisi';
+			errorMessage = "Semua field harus diisi";
 			return;
 		}
-		
+
 		if (!validateUsername(username)) {
-			errorMessage = 'Username harus 3-20 karakter dan hanya boleh mengandung huruf, angka, dan underscore';
+			errorMessage =
+				"Username harus 3-20 karakter dan hanya boleh mengandung huruf, angka, dan underscore";
 			return;
 		}
 
 		isLoading = true;
 
 		// Check if user already exists
-		const existingUsers = JSON.parse(localStorage.getItem('edu-ruang-users') || '[]');
-		const existingUser = existingUsers.find((u: EduRuangUser) => u.username === username);
+		const existingUsers = JSON.parse(
+			localStorage.getItem("edu-ruang-users") || "[]",
+		);
+		const existingUser = existingUsers.find(
+			(u: EduRuangUser) => u.username === username,
+		);
 
 		if (existingUser) {
 			// Login existing user
 			existingUser.lastActive = new Date();
 			// Ensure the existing user has the required role property
 			if (!existingUser.role) {
-				existingUser.role = 'murid'; // Default role
+				existingUser.role = selectedRole; // Update role if missing
 			}
 			authFunctions.login(existingUser);
 		} else {
@@ -54,18 +70,39 @@
 				level: 1,
 				joinDate: new Date(),
 				lastActive: new Date(),
-				role: 'murid' // Default role for login page
+				role: selectedRole,
 			};
 
 			// Save to localStorage
 			existingUsers.push(newUser);
-			localStorage.setItem('edu-ruang-users', JSON.stringify(existingUsers));
+			localStorage.setItem(
+				"edu-ruang-users",
+				JSON.stringify(existingUsers),
+			);
 
 			// Login the new user
 			authFunctions.login(newUser);
+
+			// Check role and redirect
+			if (newUser.role === "guru") {
+				goto("/dashboard/guru");
+			} else if (newUser.role === "murid") {
+				goto("/dashboard/murid");
+			} else {
+				goto("/");
+			}
 		}
 
-		goto('/');
+		if (existingUser) {
+			if (existingUser.role === "guru") {
+				goto("/dashboard/guru");
+			} else if (existingUser.role === "murid") {
+				goto("/dashboard/murid");
+			} else {
+				goto("/");
+			}
+		}
+
 		isLoading = false;
 	}
 
@@ -83,12 +120,22 @@
 				</div>
 			</div>
 			<h1 class="text-3xl font-bold mb-2">Selamat Datang di Edu Ruang</h1>
-			<p class="text-secondary">Platform pembelajaran interaktif untuk siswa SMA</p>
+			<p class="text-secondary">
+				Platform pembelajaran interaktif untuk siswa SMA
+			</p>
 		</div>
 
-		<form onsubmit={(event) => { event.preventDefault(); handleLogin(); }} class="login-form">
+		<form
+			onsubmit={(event) => {
+				event.preventDefault();
+				handleLogin();
+			}}
+			class="login-form"
+		>
 			{#if errorMessage}
-				<div class="error-message flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg mb-4">
+				<div
+					class="error-message flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg mb-4"
+				>
 					<AlertCircle size={20} color="#EF4444" />
 					<span class="text-error">{errorMessage}</span>
 				</div>
@@ -96,24 +143,50 @@
 
 			<div class="form-group mb-4">
 				<label for="username" class="form-label">Username</label>
-				<input 
+				<input
 					id="username"
-					type="text" 
+					type="text"
 					bind:value={username}
 					placeholder="Masukkan username unik"
-					required 
+					required
 				/>
 			</div>
 
 			<div class="form-group mb-4">
 				<label for="name" class="form-label">Nama Lengkap</label>
-				<input 
+				<input
 					id="name"
-					type="text" 
+					type="text"
 					bind:value={name}
 					placeholder="Masukkan nama lengkap"
-					required 
+					required
 				/>
+			</div>
+
+			<div class="form-group mb-4">
+				<label for="role" class="form-label">Masuk Sebagai</label>
+				<div class="role-selector">
+					<button
+						type="button"
+						class="role-option {selectedRole === 'murid'
+							? 'selected'
+							: ''}"
+						onclick={() => (selectedRole = "murid")}
+					>
+						<GraduationCap size={24} />
+						<span>Murid</span>
+					</button>
+					<button
+						type="button"
+						class="role-option {selectedRole === 'guru'
+							? 'selected'
+							: ''}"
+						onclick={() => (selectedRole = "guru")}
+					>
+						<School size={24} />
+						<span>Guru</span>
+					</button>
+				</div>
 			</div>
 
 			<div class="form-group mb-6">
@@ -139,9 +212,11 @@
 				<span class="form-label">Pilih Avatar</span>
 				<div class="avatar-grid">
 					{#each availableAvatars as avatar}
-						<button 
+						<button
 							type="button"
-							class="avatar-option {selectedAvatar === avatar ? 'selected' : ''}"
+							class="avatar-option {selectedAvatar === avatar
+								? 'selected'
+								: ''}"
 							onclick={() => handleAvatarSelect(avatar)}
 						>
 							<div class="avatar-placeholder">
@@ -153,7 +228,11 @@
 				</div>
 			</div>
 
-			<button type="submit" class="btn-primary btn-lg w-full" disabled={isLoading}>
+			<button
+				type="submit"
+				class="btn-primary btn-lg w-full"
+				disabled={isLoading}
+			>
 				{#if isLoading}
 					<div class="spinner"></div>
 					Memproses...
@@ -173,7 +252,7 @@
 		justify-content: center;
 		min-height: 100vh;
 		padding: var(--space-4);
-		background: linear-gradient(135deg, #3B82F6, #8B5CF6, #10B981);
+		background: linear-gradient(135deg, #3b82f6, #8b5cf6, #10b981);
 	}
 
 	.login-card {
@@ -205,6 +284,38 @@
 		font-weight: var(--font-medium);
 		margin-bottom: var(--space-2);
 		color: var(--text-primary);
+	}
+
+	.role-selector {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-3);
+	}
+
+	.role-option {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: var(--space-4);
+		border: 2px solid var(--border-light);
+		border-radius: var(--radius-lg);
+		background: var(--bg-secondary);
+		cursor: pointer;
+		transition: all 0.2s ease;
+		gap: var(--space-2);
+		color: var(--text-secondary);
+	}
+
+	.role-option:hover {
+		border-color: var(--primary-blue);
+		background: var(--bg-primary);
+	}
+
+	.role-option.selected {
+		border-color: var(--primary-blue);
+		background: rgba(59, 130, 246, 0.1);
+		color: var(--primary-blue);
+		font-weight: var(--font-medium);
 	}
 
 	.avatar-grid {

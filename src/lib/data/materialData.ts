@@ -385,6 +385,64 @@ export const samplePhysicsMaterials: Material[] = [
 - **Kinetik**: Ek = ½mv²
 - **Potensial**: Ep = mgh
 - **Usaha**: W = F × s`
+  },
+  {
+    id: 'physics-optics',
+    subjectId: 'fisika',
+    title: 'Optik Geometri',
+    description: 'Mempelajari sifat cahaya, pemantulan, dan pembiasan.',
+    level: 'intermediate',
+    duration: 25,
+    tags: ['optik', 'cahaya', 'cermin', 'lensa'],
+    order: 2,
+    createdAt: new Date('2024-01-02'),
+    updatedAt: new Date('2024-01-02'),
+    thumbnail: '/images/materials/physics-optics-thumb.jpg',
+    objectives: [
+      'Memahami hukum pemantulan dan pembiasan',
+      'Menggambar pembentukan bayangan pada cermin dan lensa',
+      'Menghitung jarak fokus, jarak benda, dan jarak bayangan'
+    ],
+    summary: 'Pelajaran tentang sifat cahaya, cermin, dan lensa.',
+    downloadable: true,
+    bookmarkable: true,
+    sections: [
+      {
+        id: 'reflection',
+        title: 'Pemantulan Cahaya',
+        content: `**Hukum Pemantulan**:
+1. Sinar datang, sinar pantul, dan garis normal terletak pada satu bidang datar.
+2. Sudut datang sama dengan sudut pantul.
+
+**Cermin Datar**: Bayangan maya, tegak, sama besar.
+**Cermin Cekung**: Mengumpulkan cahaya (konvergen).
+**Cermin Cembung**: Menyebarkan cahaya (divergen).`,
+        type: 'text',
+        order: 1
+      },
+      {
+        id: 'refraction',
+        title: 'Pembiasan Cahaya',
+        content: `Pembelokan arah rambat cahaya saat melewati dua medium yang berbeda kerapatannya.
+        
+**Hukum Snellius**:
+n₁ sin i = n₂ sin r`,
+        type: 'text',
+        order: 2
+      }
+    ],
+    content: `# Optik Geometri
+    
+## Pemantulan
+- Sudut datang = Sudut pantul
+- Cermin: Datar, Cekung, Cembung
+
+## Pembiasan
+- Pembelokan cahaya antar medium
+- Lensa: Cembung (Positif), Cekung (Negatif)
+
+## Rumus Umum
+1/f = 1/s + 1/s'`
   }
 ];
 
@@ -417,6 +475,57 @@ export const sampleBiologyMaterials: Material[] = [
     order: 1,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01')
+  },
+  {
+    id: 'biology-ecosystem',
+    subjectId: 'biologi',
+    title: 'Ekosistem dan Lingkungan',
+    description: 'Memahami interaksi antara makhluk hidup dan lingkungannya dalam suatu ekosistem.',
+    content: `# Ekosistem dan Lingkungan
+    
+## Komponen Ekosistem
+- **Biotik**: Makhluk hidup (produsen, konsumen, pengurai)
+- **Abiotik**: Benda tak hidup (air, tanah, udara, cahaya)
+
+## Rantai Makanan
+Produsen -> Konsumen I -> Konsumen II -> Pengurai
+
+## Daur Biogeokimia
+Perputaran unsur-unsur kimia (karbon, nitrogen, air) di alam.`,
+    level: 'basic',
+    duration: 20,
+    tags: ['ekosistem', 'lingkungan', 'rantai makanan'],
+    order: 2,
+    createdAt: new Date('2024-01-02'),
+    updatedAt: new Date('2024-01-02'),
+    thumbnail: '/images/materials/biology-ecosystem-thumb.jpg',
+    objectives: [
+      'Memahami komponen-komponen penyusun ekosistem',
+      'Menganalisis interaksi antar komponen ekosistem',
+      'Memahami aliran energi dalam ekosistem'
+    ],
+    sections: [
+      {
+        id: 'eco-components',
+        title: 'Komponen Ekosistem',
+        content: 'Ekosistem terdiri dari dua komponen utama: Biotik (hidup) dan Abiotik (tak hidup).',
+        type: 'text',
+        order: 1
+      },
+      {
+        id: 'food-chain',
+        title: 'Rantai Makanan',
+        content: 'Peristiwa makan dan dimakan antar makhluk hidup dengan urutan tertentu.',
+        type: 'text',
+        order: 2,
+        media: {
+          type: 'image',
+          url: '/images/materials/food-chain.jpg',
+          alt: 'Rantai Makanan',
+          caption: 'Contoh rantai makanan di sawah'
+        }
+      }
+    ]
   }
 ];
 
@@ -450,6 +559,37 @@ Contoh: Adik (S) membaca (P) buku (O) di perpustakaan (K)
     order: 1,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01')
+  },
+  {
+    id: 'indonesian-literature',
+    subjectId: 'bahasa-indonesia',
+    title: 'Sastra Indonesia',
+    description: 'Mengenal berbagai karya sastra Indonesia seperti puisi, prosa, dan drama.',
+    content: `# Sastra Indonesia
+    
+## Puisi
+Karya sastra yang terikat oleh irama, rima, dan penyusunan larik.
+- **Puisi Lama**: Pantun, syair, gurindam
+- **Puisi Baru**: Soneta, himne, balada
+
+## Prosa
+Karya sastra yang berbentuk cerita bebas.
+- **Prosa Lama**: Hikayat, dongeng
+- **Prosa Baru**: Cerpen, novel
+
+## Drama
+Karya sastra yang dipentaskan.`,
+    level: 'intermediate',
+    duration: 25,
+    tags: ['sastra', 'puisi', 'prosa'],
+    order: 2,
+    createdAt: new Date('2024-01-02'),
+    updatedAt: new Date('2024-01-02'),
+    objectives: [
+      'Membedakan jenis-jenis karya sastra',
+      'Mengapresiasi karya sastra Indonesia',
+      'Memahami unsur intrinsik karya sastra'
+    ]
   }
 ];
 
@@ -1426,13 +1566,100 @@ The **main idea** is what the text is mostly about. It's the most important poin
   }
 ];
 
+// Sample Materials for Kimia
+export const sampleChemistryMaterials: Material[] = [
+  {
+    id: 'chemistry-atom',
+    subjectId: 'kimia',
+    title: 'Struktur Atom',
+    description: 'Mempelajari partikel penyusun atom, nomor atom, dan nomor massa.',
+    level: 'basic',
+    duration: 20,
+    tags: ['atom', 'proton', 'elektron', 'neutron'],
+    order: 1,
+    createdAt: new Date('2024-01-02'),
+    updatedAt: new Date('2024-01-02'),
+    thumbnail: '/images/materials/chemistry-atom-thumb.jpg',
+    objectives: [
+      'Menjelaskan perkembangan teori atom',
+      'Menentukan jumlah proton, elektron, dan neutron',
+      'Memahami isotop, isobar, dan isoton'
+    ],
+    summary: 'Pengenalan struktur atom dan partikel penyusunnya.',
+    sections: [
+      {
+        id: 'atom-particles',
+        title: 'Partikel Penyusun Atom',
+        content: `Atom terdiri dari:
+1. **Proton**: Bermuatan positif (+), di dalam inti.
+2. **Neutron**: Netral (0), di dalam inti.
+3. **Elektron**: Bermuatan negatif (-), mengelilingi inti.`,
+        type: 'text',
+        order: 1
+      },
+      {
+        id: 'atomic-notation',
+        title: 'Notasi Atom',
+        content: `X = Lambang Unsur
+A = Nomor Massa (Proton + Neutron)
+Z = Nomor Atom (Proton = Elektron pada atom netral)`,
+        type: 'text',
+        order: 2
+      }
+    ],
+    content: `# Struktur Atom
+    
+## Partikel Subatom
+- Proton (+)
+- Elektron (-)
+- Neutron (Netral)
+
+## Notasi
+A
+ X
+Z
+A = Massa
+Z = Nomor Atom`
+  },
+  {
+    id: 'chemistry-bonding',
+    subjectId: 'kimia',
+    title: 'Ikatan Kimia',
+    description: 'Memahami pembentukan ikatan ion, kovalen, dan logam.',
+    level: 'intermediate',
+    duration: 30,
+    tags: ['ikatan ion', 'ikatan kovalen', 'ikatan logam'],
+    order: 2,
+    createdAt: new Date('2024-01-02'),
+    updatedAt: new Date('2024-01-02'),
+    thumbnail: '/images/materials/chemistry-bonding-thumb.jpg',
+    objectives: [
+      'Membedakan ikatan ion dan kovalen',
+      'Menggambarkan struktur Lewis',
+      'Menjelaskan sifat senyawa ion dan kovalen'
+    ],
+    content: `# Ikatan Kimia
+    
+## Ikatan Ion
+Serah terima elektron antara logam dan non-logam.
+Contoh: NaCl, MgO
+
+## Ikatan Kovalen
+Pemakaian bersama pasangan elektron antara non-logam.
+Contoh: H2O, CH4, O2
+
+## Ikatan Logam
+Lautan elektron pada atom-atom logam.`
+  }
+];
+
 // Combine all materials by subject
 export const sampleMaterialsBySubject = {
   'matematika': sampleMathMaterials,
   'fisika': samplePhysicsMaterials,
   'biologi': sampleBiologyMaterials,
   'bahasa-indonesia': sampleIndonesianMaterials,
-  'kimia': [],
+  'kimia': sampleChemistryMaterials,
   'bahasa-inggris': sampleEnglishMaterials,
   'ips': sampleIPSMaterials,
   'ipa': sampleScienceMaterials

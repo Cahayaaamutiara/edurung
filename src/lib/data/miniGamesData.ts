@@ -45,7 +45,7 @@ export const sampleMiniGames: MiniGame[] = [
       ]
     }
   },
-  
+
   // Picture Puzzle Games
   {
     id: 'puzzle-geography-1',
@@ -57,7 +57,7 @@ export const sampleMiniGames: MiniGame[] = [
     basePoints: 150,
     timeLimit: 600, // 10 minutes
     data: {
-      completeImage: '/images/puzzles/indonesia-map.png',
+      completeImage: 'https://placehold.co/600x600/10b981/ffffff.png?text=Peta+Indonesia',
       description: 'Peta lengkap kepulauan Indonesia dengan batas provinsi yang jelas',
       pieces: [
         { id: '0', src: '/images/puzzles/piece-0.jpg', correctPosition: 0 },
@@ -326,7 +326,7 @@ export const sampleMiniGames: MiniGame[] = [
       ]
     }
   },
-  
+
   // Indonesian Geography Drag-Drop Game
   {
     id: 'dragdrop-geography-indonesia',
@@ -550,13 +550,13 @@ export const sampleMiniGameAchievements: MiniGameAchievement[] = [
 // Utility function to initialize mini-games data in localStorage
 export function initializeMiniGamesData() {
   if (typeof window === 'undefined') return;
-  
+
   // Initialize mini-games if not exists
   const existingGames = localStorage.getItem('edu-ruang-mini-games');
   if (!existingGames) {
     localStorage.setItem('edu-ruang-mini-games', JSON.stringify(sampleMiniGames));
   }
-  
+
   // Initialize achievements if not exists
   const existingAchievements = localStorage.getItem('edu-ruang-minigame-achievements');
   if (!existingAchievements) {
@@ -571,21 +571,21 @@ export function generateCrosswordGrid(data: CrosswordData): { grid: (string | nu
   const gridWidth = width || 10;
   const grid: (string | null)[][] = Array(gridHeight).fill(null).map(() => Array(gridWidth).fill(null));
   const solution: string[][] = Array(gridHeight).fill(null).map(() => Array(gridWidth).fill(''));
-  
+
   clues.forEach((clue: CrosswordClue) => {
     const { answer, startRow, startCol, direction } = clue;
-    
+
     for (let i = 0; i < answer.length; i++) {
       const row = direction === 'across' ? startRow : startRow + i;
       const col = direction === 'across' ? startCol + i : startCol;
-      
+
       if (row < gridHeight && col < gridWidth) {
         solution[row][col] = answer[i];
         grid[row][col] = ''; // Empty cell for player input
       }
     }
   });
-  
+
   return { grid, solution };
 }
 
@@ -594,7 +594,7 @@ export function generatePuzzlePieces(rows: number, cols: number): any[] {
   const pieces = [];
   const pieceWidth = 100 / cols;
   const pieceHeight = 100 / rows;
-  
+
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
       pieces.push({
@@ -609,7 +609,7 @@ export function generatePuzzlePieces(rows: number, cols: number): any[] {
       });
     }
   }
-  
+
   // Shuffle pieces
   return pieces.sort(() => Math.random() - 0.5);
 }

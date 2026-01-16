@@ -281,6 +281,11 @@ export interface MiniGame {
   basePoints: number;
   timeLimit?: number; // in seconds
   data: CrosswordData | PicturePuzzleData | QuickQuizData | DragDropData;
+  // UI display properties
+  rating?: number; // Game rating (e.g., 4.5)
+  duration?: number; // Estimated play duration in minutes
+  thumbnail?: string | null; // Cover image URL
+  playedCount?: number; // Number of times the game has been played
 }
 
 export interface CrosswordData {
